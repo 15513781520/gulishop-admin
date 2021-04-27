@@ -66,7 +66,7 @@
 
 		<!-- dialog 呆郎葛 -->
 		<el-dialog
-			title="添加品牌"
+			:title="tmForm.id ? '修改品牌' : '添加品牌'"
 			:visible.sync="dialogFormVisible"
 			width="30%"
 		>

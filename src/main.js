@@ -15,6 +15,11 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 
+//引入所有的 api 请求函数
+import * as API from '@/api'
+//把 API 对象放到 Vue 的原型上
+Vue.prototype.$API = API
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

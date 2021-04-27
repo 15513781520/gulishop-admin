@@ -30,8 +30,7 @@ import Layout from '@/layout'
  * a base page that does not have permission requirements
  * all roles can be accessed
  */
-export const constantRoutes = [
-  {
+export const constantRoutes = [{
     path: '/login',
     component: () => import('@/views/login/index'),
     hidden: true
@@ -49,19 +48,66 @@ export const constantRoutes = [
     redirect: '/dashboard',
     children: [{
       path: 'dashboard',
-      name: '首页',
+      name: 'Dashboard',
       component: () => import('@/views/dashboard/index'),
-      meta: { title: '首页', icon: 'dashboard' }
+      meta: {
+        title: '首页',
+        icon: 'dashboard'
+      }
     }]
+  },
+  {
+    path: '/product',
+    name: 'Product',
+    component: Layout,
+    meta: {
+      title: '商品管理',
+      icon: 'el-icon-s-shop'
+    },
+    redirect: '/product/trademark/list',
+    children: [
+		{
+			path: 'trademark/list',
+			name: 'Trademark',
+			component: () => import('@/views/product/trademark/List'),
+			meta: {
+				title: '品牌管理'
+			}
+		},
+		{
+			path:'attr/list',
+			name:'Attr',
+			component:() => import('@/views/product/attr/List'),
+			meta:{title:'属性管理'}
+		},
+		{
+			path:'sku/list',
+			name:'Sku',
+			component:() => import('@/views/product/sku/List'),
+			meta:{title:'Sku管理'}
+		},
+		{
+			path:'spu/list',
+			name:'Spu',
+			component:() => import('@/views/product/spu/List'),
+			meta:{title:'Spu管理'}
+		}
+	]
   },
 
   // 404 page must be placed at the end !!!
-  { path: '*', redirect: '/404', hidden: true }
+  {
+    path: '*',
+    redirect: '/404',
+    hidden: true
+  }
 ]
 
 const createRouter = () => new Router({
   // mode: 'history', // require service support
-  scrollBehavior: () => ({ y: 0 }),
+  scrollBehavior: () => ({
+    y: 0
+  }),
   routes: constantRoutes
 })
 

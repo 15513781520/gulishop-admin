@@ -1,7 +1,9 @@
 <template>
 	<div>
 		<!-- 添加按钮 -->
-		<el-button type="primary" icon="el-icon-plus" @click="showAdd">添加</el-button>
+		<el-button type="primary" icon="el-icon-plus" @click="showAdd"
+			>添加</el-button
+		>
 		<!-- table表格 用来展示数据 -->
 		<el-table
 			:data="trademarkList"
@@ -35,11 +37,17 @@
 			</el-table-column>
 			<el-table-column prop="prop" label="操作" width="width">
 				<template slot-scope="{ row, $index }">
-					<el-button type="warning" icon="el-icon-edit" size="mini"
+					<el-button
+						type="warning"
+						icon="el-icon-edit"
+						size="mini"
 						@click="showUpdate(row)"
 						>修改</el-button
 					>
-					<el-button type="danger" icon="el-icon-delete" size="mini"
+					<el-button
+						type="danger"
+						icon="el-icon-delete"
+						size="mini"
 						@click="deleteTrademark(row)"
 						>删除</el-button
 					>
@@ -86,17 +94,21 @@
 						:on-success="handleAvatarSuccess"
 						:before-upload="beforeAvatarUpload"
 					>
-						<img v-if="tmForm.logoUrl" :src="tmForm.logoUrl" class="avatar" />
+						<img
+							v-if="tmForm.logoUrl"
+							:src="tmForm.logoUrl"
+							class="avatar"
+						/>
 						<i v-else class="el-icon-plus avatar-uploader-icon"></i>
-						 <div class="el-upload__tip" slot="tip">只能上传jpg文件，且不超过2Mb</div>
+						<div class="el-upload__tip" slot="tip">
+							只能上传jpg文件，且不超过2Mb
+						</div>
 					</el-upload>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogFormVisible = false">取 消</el-button>
-				<el-button type="primary" @click="addOrUpdate"
-					>确 定</el-button
-				>
+				<el-button type="primary" @click="addOrUpdate">确 定</el-button>
 			</div>
 		</el-dialog>
 	</div>
@@ -132,7 +144,7 @@
 				const { page, limit } = this;
 				try {
 					const result = await this.$API.trademark.getList(page, limit);
-					if (result.code === 200 || result.code === 2000) {
+					if (result.code === 200 || result.code === 20000) {
 						this.total = result.data.total;
 						this.trademarkList = result.data.records;
 					}
@@ -187,7 +199,7 @@
 					else await this.$API.trademark.add(tmForm)
 					//请求成功，提示用户，重新获取数据，添加回到第一页，修改留在当前页,关闭 dialog
 					this.$message.success(tmForm.id ? `修改${tmForm.tmName}成功` : `添加${tmForm.tmName}成功`)
-					this.getList(tmForm.id ? this.page : 1 ,this.limit)
+					this.getList(tmForm.id ? this.page : 1 )
 					this.dialogFormVisible = false
 				} catch (error) {
 					//请求失败，提示用户
@@ -195,19 +207,22 @@
 				}
 			},
 			//删除品牌
-			async deleteTrademark(row){
-				try {
-					await this.$confirm(`你确定删除 ${row.tmName} 吗？`)
+			deleteTrademark(row){
+				this.$confirm(`你确定删除 ${row.tmName} 吗？`)
+				.then(async () => {
 					try {
 						await this.$API.trademark.delete(row.id)
 						this.$message.success(`删除${row.tmName}成功`)
-						this.getList(this.page,this.limit)
+						this.getList(this.trademarkList.length > 1 ?  this.page : this.page - 1)
 					} catch (error) {
 						this.$message.error(`删除${row.tmName}失败`)
 					}
-				} catch (error) {
-					
-				}
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});   
+				})
 			}
 		},
 		mounted() {

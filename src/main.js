@@ -20,6 +20,12 @@ import * as API from '@/api'
 //把 API 对象放到 Vue 的原型上
 Vue.prototype.$API = API
 
+//全局注册统一放在这里
+import CategorySelector from '@/components/CategorySelector';
+Vue.component('CategorySelector',CategorySelector)
+import HintButton from '@/components/HintButton'
+Vue.component('HintButton',HintButton)
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

@@ -78,15 +78,23 @@
 			:visible.sync="dialogFormVisible"
 			width="30%"
 		>
-			<el-form :model="tmForm">
-				<el-form-item label="品牌名称" label-width="100px">
+			<el-form :model="tmForm" :rules="rules" ref="tmForm">
+				<el-form-item
+					label="品牌名称"
+					prop="tmName"
+					label-width="100px"
+				>
 					<el-input
 						v-model="tmForm.tmName"
 						autocomplete="off"
 						style="width: 80%"
 					></el-input>
 				</el-form-item>
-				<el-form-item label="品牌LOGO" label-width="100px">
+				<el-form-item
+					label="品牌LOGO"
+					prop="logoUrl"
+					label-width="100px"
+				>
 					<el-upload
 						class="avatar-uploader"
 						action="/dev-api/admin/product/fileUpload"
@@ -118,6 +126,14 @@
 	export default {
 		name: "TrademarkList",
 		data() {
+			//自定义验证规则的函数
+			const validateTmName = (rule, value, callback) => {
+				if (value.length < 2 || value.length >10) {
+					callback(new Error("品牌名称的长度应在 2 ~ 10 个字符之间"));
+				} else {
+					callback();
+				}
+			};
 			return {
 				//初始化请求参数
 				page: 1,
@@ -134,6 +150,35 @@
 				tmForm: {
 					tmName: "",
 					logoUrl: "",
+				},
+				rules: {
+					//表单验证规则对象
+					//品牌名称验证规则，验证的是 tmForm 中的 tmName 字段 ， 需要和表单项中 prop 中的 属性值对应
+					tmName: [
+						{
+							required: true, //必须填写
+							message: "请输入品牌名称", //错误提示
+							trigger: "blur", //失去焦点时触发验证
+						},
+						//使用自定义的验证规则，是一个函数
+						{
+							validator: validateTmName,
+							trigger: "change",
+						},
+						// {
+						// 	min: 2, //最小长度
+						// 	max: 10, //最大长度
+						// 	message: "长度在 2 到 10 个字符", //错误提示
+						// 	trigger: "change", //内容发生改变时触发验证
+						// },
+					],
+					//品牌LOGO 图片url验证规则，验证的是 tmForm 中的 logoUrl 字段 ， 需要和表单项中 prop 中的 属性值对应
+					logoUrl: [
+						{
+							required: true, //必须上传
+							message: "请上传品牌LOGO", //错误提示  uploda 无法触发验证，只能整体验证
+						},
+					],
 				},
 			};
 		},
@@ -158,7 +203,7 @@
 			//上传成功的回调函数
 			handleAvatarSuccess(res, file) {
 				//将图片上传请求回来的图片路径更新到data中
-				this.tmForm.logoUrl = res.data
+				this.tmForm.logoUrl = res.data;
 			},
 			//上传之前的回调函数
 			beforeAvatarUpload(file) {
@@ -174,56 +219,79 @@
 				return isJPG && isLt2M;
 			},
 			//添加按钮事件
-			showAdd(){
+			showAdd() {
 				//初始化 tmForm 中的数据
 				this.tmForm = {
 					tmName: "",
 					logoUrl: "",
-				}
+				};
 				//显示 dialog
-				this.dialogFormVisible = true
+				this.dialogFormVisible = true;
 			},
 			//修改按钮的事件
-			showUpdate(row){
+			showUpdate(row) {
 				//将 要修改的 品牌对象拷贝给 tnFrom
-				this.tmForm = {...row}
+				this.tmForm = { ...row };
 				//显示 dialog
-				this.dialogFormVisible = true
+				this.dialogFormVisible = true;
 			},
 			//添加或修改
-			async addOrUpdate(){
-				const {tmForm} = this
-				try {
-					//判断 tmForm.id 是否存在，存在表示修改，不存在表示添加
-					if(tmForm.id) await this.$API.trademark.update(tmForm)
-					else await this.$API.trademark.add(tmForm)
-					//请求成功，提示用户，重新获取数据，添加回到第一页，修改留在当前页,关闭 dialog
-					this.$message.success(tmForm.id ? `修改${tmForm.tmName}成功` : `添加${tmForm.tmName}成功`)
-					this.getList(tmForm.id ? this.page : 1 )
-					this.dialogFormVisible = false
-				} catch (error) {
-					//请求失败，提示用户
-					this.$message.error(tmForm.id ? `修改${tmForm.tmName}失败` : `添加${tmForm.tmName}失败`)
-				}
+			addOrUpdate() {
+				//真正发请求添加前先对表单进行整体验证
+				this.$refs.tmForm.validate(async (valid) => {
+					if (valid) {
+						//验证通过发送请求添加或修改数据
+						const { tmForm } = this;
+						try {
+							//判断 tmForm.id 是否存在，存在表示修改，不存在表示添加
+							if (tmForm.id) await this.$API.trademark.update(tmForm);
+							else await this.$API.trademark.add(tmForm);
+							//请求成功，提示用户，重新获取数据，添加回到第一页，修改留在当前页,关闭 dialog
+							this.$message.success(
+								tmForm.id
+									? `修改${tmForm.tmName}成功`
+									: `添加${tmForm.tmName}成功`
+							);
+							this.getList(tmForm.id ? this.page : 1);
+							this.dialogFormVisible = false;
+						} catch (error) {
+							//请求失败，提示用户
+							this.$message.error(
+								tmForm.id
+									? `修改${tmForm.tmName}失败`
+									: `添加${tmForm.tmName}失败`
+							);
+						}
+					} else {
+						this.$message.error("请检查内容是否正确！");
+						console.log("error submit!!");
+						return false;
+					}
+				});
 			},
 			//删除品牌
-			deleteTrademark(row){
+			deleteTrademark(row) {
 				this.$confirm(`你确定删除 ${row.tmName} 吗？`)
-				.then(async () => {
-					try {
-						await this.$API.trademark.delete(row.id)
-						this.$message.success(`删除${row.tmName}成功`)
-						this.getList(this.trademarkList.length > 1 ?  this.page : this.page - 1)
-					} catch (error) {
-						this.$message.error(`删除${row.tmName}失败`)
-					}
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '已取消删除'
-					});   
-				})
-			}
+					.then(async () => {
+						try {
+							await this.$API.trademark.delete(row.id);
+							this.$message.success(`删除${row.tmName}成功`);
+							this.getList(
+								this.trademarkList.length > 1
+									? this.page
+									: this.page - 1
+							);
+						} catch (error) {
+							this.$message.error(`删除${row.tmName}失败`);
+						}
+					})
+					.catch(() => {
+						this.$message({
+							type: "info",
+							message: "已取消删除",
+						});
+					});
+			},
 		},
 		mounted() {
 			this.getList();

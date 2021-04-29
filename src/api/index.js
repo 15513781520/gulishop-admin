@@ -12,6 +12,8 @@ export { default as category } from './product/category'
 //属性管理相关 api 模块
 export { default as attr } from './product/attr'
 
+//spu 管理相关 api 模块
+export { default as spu } from './product/spu'
 
 // {
 //     trademark

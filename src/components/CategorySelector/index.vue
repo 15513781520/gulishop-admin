@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<el-form :inline="true" :model="categoryForm">
+		<el-form :inline="true" :model="categoryForm" :disabled="disabled">
 			<el-form-item label="一级分类">
 				<el-select
 					v-model="categoryForm.category1Id"
@@ -50,6 +50,7 @@
 <script>
 	export default {
 		name: "CategorySelector",
+		props:['disabled'],
 		data() {
 			return {
 				//初始化分类列表
